@@ -382,6 +382,7 @@ class WriteGear:
             rgb_mode (boolean): enable this flag to activate RGB mode _(i.e. specifies that incoming frames are of RGB format(instead of default BGR)_.
 
         """
+        timer = Timer()
         if frame is None:  # None-Type frames will be skipped
             return
 
@@ -420,7 +421,7 @@ class WriteGear:
             raise ValueError(
                 "[WriteGear:ERROR] :: All video-frames must have same datatype!"
             )
-
+        timer(f"🖼️ Frame write validation:")
         # checks if compression mode is enabled
         if self.__compression:
             # initiate FFmpeg process on first run
@@ -429,6 +430,7 @@ class WriteGear:
                 self.__PreprocessFFParams(channels, dtype=dtype, rgb=rgb_mode)
                 # Check status of the process
                 assert self.__process is not None
+                timer(f"1️⃣ First time setup:")
             try:
                 # try writing the frame bytes to the subprocess pipeline
                 self.__process.stdin.write(frame.tobytes())
@@ -462,7 +464,7 @@ class WriteGear:
             dtype (str): Datatype of input frame.
             rgb_mode (boolean): Whether to activate `RGB mode`?
         """
-        timer = Timer()
+
         # turn off initiate flag
         self.__initiate_process = False
         # initialize input parameters
@@ -532,14 +534,10 @@ class WriteGear:
             )
             input_parameters["-framerate"] = str(self.__inputframerate)
 
-        timer(f"🎬 Set parameters:")
-
         # initiate FFmpeg process
         self.__start_FFProcess(
             input_params=input_parameters, output_params=self.__output_parameters
         )
-
-        timer(f"🎬 ffmpeg process start:")
 
     def __start_FFProcess(self, input_params, output_params):
         """
